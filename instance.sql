@@ -43,3 +43,53 @@ select * from total_color_nums limit 2;
 
 
 -- 品牌'汉'的车在哪个月卖的最好
+create view best_sale_month as
+select to_char(sale_date, 'YYYY-MM') date1, count(*) 
+from sale natural join vehicle
+where brand_name = '汉'
+group by date1
+order by count(*);
+
+select * from best_sale_month limit 1;
+
+-- 实现简单的权限控制
+create role customers identified by 'kunpeng@1234';
+create role vendors identified by 'kunpeng@1234';
+create role dealers identified by 'kunpeng@1234';
+create user yewenbo identified by 'kunpeng@1234';
+create user liqi identified by 'kunpeng@1234';
+create user fojiya identified by 'kunpeng@1234';
+create user kedaxunfei identified by 'kunpeng@1234';
+create user chengdu identified by 'kunpeng@1234';
+create user shanghai identified by 'kunpeng@1234';
+
+-- 授予角色连接权限
+alter role customers login;
+alter role vendors login;
+alter role dealers login;
+
+-- 授予角色对模式的使用权限
+grant usage on schema zhangliqun to customers, vendors, dealers;
+grant usage on schema zhangliqun to yewenbo, liqi;
+grant usage on schema zhangliqun to fojiya, kedaxunfei;
+grant usage on schema zhangliqun to chengdu, shanghai;
+
+-- 授予角色控制权限
+grant select on table vehicle, brand, models, dealer, customer to customers;
+grant update on table customer to customers;
+grant select on table models, supply, vendor to vendors;
+grant update on table supply, vendor to customers;
+grant select on table vehicle, customer,  dealer, sale to dealers;
+grant update on table sale, dealer to dealers;
+
+-- 将用户添加到角色组
+grant customers to yewenbo, liqi;
+grant vendors to fojiya, kedaxunfei;
+grant dealers to chengdu, shanghai;
+
+-- 测试 
+\c zhangliqundb yewenbo
+select * from customer;
+select * from sale;
+update customer set customer_phone = 19135008746 where customer_name = '叶文博';
+update sale set customer_id = 1009;
